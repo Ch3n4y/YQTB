@@ -1,5 +1,5 @@
 # 解析数据，生成提交formData
-class Parser:
+class Parser1:
     def __init__(self, data):
         self.item_keys = {'_VAR_EXECUTE_INDEP_ORGANIZE_Name': None, '_VAR_ACTION_INDEP_ORGANIZES_Codes': None,
                           '_VAR_ACTION_REALNAME': None, '_VAR_ACTION_ORGANIZE': None, '_VAR_EXECUTE_ORGANIZE': None,
@@ -138,3 +138,43 @@ class Parser:
         }
         post_data_info = dict(post_data1, **post_data2)
         return post_data_info
+
+class Parser2:
+    def __init__(self, data):
+        self.item_keys = {'fieldCXY': None, '_VAR_ACTION_REALNAME': None, '_VAR_RELEASE': None, '_VAR_NOW_MONTH': None,
+                          '_VAR_ACTION_USERCODES': None, '_VAR_ACTION_ACCOUNT': None,
+                          '_VAR_ACTION_ORGANIZES_Names': None,
+                          '_VAR_URL_Attr': None, '_VAR_POSITIONS': None, '_VAR_ACTION_ORGANIZES_Codes': None,
+                          '_VAR_NOW_YEAR': None,
+                          '_VAR_ACTION_INDEP_ORGANIZES_Codes': None, '_VAR_ACTION_ORGANIZE': None,
+                          '_VAR_ACTION_INDEP_ORGANIZE': None,
+                          '_VAR_ACTION_INDEP_ORGANIZE_Name': None, '_VAR_ACTION_ORGANIZE_Name': None,
+                          '_VAR_OWNER_ORGANIZES_Codes': None, '_VAR_ADDR': None, '_VAR_OWNER_ORGANIZES_Names': None,
+                          '_VAR_URL': None,
+                          '_VAR_ACTION_INDEP_ORGANIZES_Names': None, '_VAR_OWNER_ACCOUNT': None,
+                          '_VAR_OWNER_USERCODES': None,
+                          '_VAR_NOW_DAY': None, '_VAR_OWNER_REALNAME': None, '_VAR_NOW': None,
+                          '_VAR_ENTRY_NUMBER': None,
+                          '_VAR_ENTRY_NAME': None, '_VAR_ENTRY_TAGS': None}
+        self.data = data
+
+    def _finditem(self, obj, key):
+        if key in obj: return obj[key]
+        for k, v in obj.items():
+            if isinstance(v, dict):
+                item = self._finditem(v, key)
+                if item is not None:
+                    return item
+            elif isinstance(v, list):
+                for row in v:
+                    item = self._finditem(row, key)
+                    if item is not None:
+                        return item
+
+    def get(self):
+        data = {'_VAR_ENTRY_NAME': '', '_VAR_ENTRY_TAGS': ''}
+        for k, v in self.item_keys.items():
+            re = self._finditem(self.data, k)
+            if re is not None:
+                data[k] = re
+        return data
