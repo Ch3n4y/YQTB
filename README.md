@@ -1,15 +1,18 @@
-## 方式1：本地执行
+## 方式1：服务器部署
+1、下载代码  
 ```shell
-pip3 install -r requirements.txt
+git clone https://github.com/Chaney1024/YQTB.git
+```
+2、修改```index.py```文件中的学号密码  
+3、安装依赖
+```shell
+cd YQTB && pip3 install -r requirements.txt
+```
+4、测试执行  
+```shell
 python3 index.py
 ```
-
-## 方式2：服务器定时任务
-安装依赖
-```shell
-pip3 install -r requirements.txt
-```
-使用linux自带定时任务```crontab```  
+5、使用linux自带定时任务```crontab```  
 ```shell
 crontab -e
 ```
@@ -19,7 +22,7 @@ crontab -e
 ```
 ```30 8,10 * * *``` 表示每天8:30,10:30各执行一次
 
-## 方式3：云函数部署
+## 方式2：云函数部署
 >> 腾讯云函数有免费额度，不需要充值  
 
 ### 1、登录[腾讯云](https://cloud.tencent.com/)
