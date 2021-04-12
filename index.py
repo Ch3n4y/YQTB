@@ -4,6 +4,7 @@ import base64
 import json
 import random
 import re
+import os
 import time
 from urllib import parse
 import requests
@@ -298,8 +299,8 @@ class YQTB:
 # 云函数
 def main_handler(event, context):
     logger.info('got event{}'.format(event))
-    username = 'xxx'  # 学号
-    password = 'xxx'  # 密码
+    username = os.getenv('USERNAME')  # 学号
+    password = os.getenv('PASSWORD')  # 密码
     YQTB(username, password).run()
 
 
