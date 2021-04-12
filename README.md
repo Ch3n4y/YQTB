@@ -3,11 +3,13 @@
 ```shell
 git clone https://github.com/Chaney1024/YQTB.git
 ```
-2、修改```index.py```文件中的学号密码  
-3、安装依赖
+2、安装依赖
 ```shell
 cd YQTB && pip3 install -r requirements.txt
 ```
+3、修改```index.py```文件中的学号密码  
+  
+  
 4、测试执行  
 ```shell
 python3 index.py
