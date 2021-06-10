@@ -60,7 +60,7 @@ class Parser1:
                           'fieldCXXXsftjhbs': None,
                           'fieldCXXXsftjhbq': None, 'fieldCXXXddsj': None, 'fieldCXXXsfylk': None,
                           'fieldCXXXlksj': None,
-                          'fieldCNS': None, 'fieldJKHDDzt': None, 'fieldJKHDDzt_Name': None, 'fieldzgzjzdzq': None,
+                          'fieldJKHDDzt': None, 'fieldJKHDDzt_Name': None, 'fieldzgzjzdzq': None,
                           'fieldzgzjzdzjtdz': None, 'fieldzgzjzdzshi': None, 'fieldzgzjzdzs': None,
                           'fieldCXXXcxzt': None,
                           'fieldCXXXjtgjbc': None, 'fieldCXXXjtfsqtms': None, 'fieldCXXXjtfsqt': None,
@@ -134,7 +134,8 @@ class Parser1:
             'fieldzgzjzdzs_Name': '',
             'fieldCXXXfxxq_Name': '',
             '_VAR_ENTRY_NAME': '学生健康状况申报_',
-            '_VAR_ENTRY_TAGS': '疫情应用,移动端'
+            '_VAR_ENTRY_TAGS': '疫情应用,移动端',
+            'fieldCNS': True,
         }
         post_data_info = dict(post_data1, **post_data2)
         return post_data_info
