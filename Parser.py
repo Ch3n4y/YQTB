@@ -73,7 +73,10 @@ class Parser1:
                           'fieldCXXXjtzzs': None, 'fieldCXXXjtzzs_Name': None, 'fieldCXXXjtzz': None,
                           'fieldCXXXjtzz_Name': None,
                           'fieldSTQKqtqksm': None, 'fieldSHENGYC': None, 'fieldYCFDY': None, 'fieldYCBZ': None,
-                          'fieldYCBJ': None}
+                          'fieldYCBJ': None,
+                          # 新增：获取网址发过来的随机码
+                          'fieldLYYZM': None,
+                          }
         self.data = data
 
     def _finditem(self, obj, key):

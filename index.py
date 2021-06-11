@@ -224,7 +224,8 @@ class YQTB:
                            "fieldSTQKzdmc,fieldSTQKjtcyks,fieldSTQKjtcystzk,fieldCXXXjtfshc,fieldCXXXcqwdq,"
                            "fieldSTQKjtcypcsj,fieldJBXXqu,fieldJBXXjgshi,fieldYQJLjcddq,fieldYQJLjcdryjkqk,"
                            "fieldYQJLjcdds,fieldSTQKjtcyhxkn,fieldCXXXjtzz,fieldJBXXjgq,fieldCXXXjtfsqt,fieldJBXXjgs,"
-                           "fieldSTQKzdjgmcc,fieldJBXXqjtxxqk,fieldDQSJ,fieldSTQKjtcyglfs",
+                           "fieldSTQKzdjgmcc,fieldJBXXqjtxxqk,fieldDQSJ,fieldSTQKjtcyglfs,"
+                           "fieldLYYZM",
             'csrfToken': self.csrfToken,
             'lang': 'zh'
         }
@@ -259,10 +260,15 @@ class YQTB:
                            "fieldSTQKzdmc,fieldSTQKjtcyks,fieldSTQKjtcystzk,fieldCXXXjtfshc,fieldCXXXcqwdq,"
                            "fieldSTQKjtcypcsj,fieldJBXXqu,fieldJBXXjgshi,fieldYQJLjcddq,fieldYQJLjcdryjkqk,"
                            "fieldYQJLjcdds,fieldSTQKjtcyhxkn,fieldCXXXjtzz,fieldJBXXjgq,fieldCXXXjtfsqt,fieldJBXXjgs,"
-                           "fieldSTQKzdjgmcc,fieldJBXXqjtxxqk,fieldDQSJ,fieldSTQKjtcyglfs",
+                           "fieldSTQKzdjgmcc,fieldJBXXqjtxxqk,fieldDQSJ,fieldSTQKjtcyglfs,"
+                           "fieldJCSJ,fieldYZNSFJCHS,fieldJKMsfwlm,fieldLYYZM",
             'csrfToken': self.csrfToken,
             'lang': 'zh'
         }
+        # 针对目前新设置的核酸检测，个人感觉会是临时的，到时候疫情过去这块直接删掉即可。
+        formData[0]['fieldJCSJ'] = "1623081600" # 6月8日 核酸检测
+        formData[0]['fieldYZNSFJCHS'] = "1" # 一周内是否做过核酸检测 1：是 2：否；若选择否，上面的日期也可不填写
+        formData[0]['fieldJKMsfwlm'] = "1"  # 健康码是否为绿码 1：是 2：否； 若选择否还需要上传健康码截图
 
         res1 = self.client.post(url='http://yqtb.gzhu.edu.cn/infoplus/interface/listNextStepsUsers', headers=headers,
                                 data=post_data1)
@@ -306,6 +312,6 @@ def main_handler(event, context):
 
 # 本地测试
 if __name__ == '__main__':
-    username = 'xxx'  # 学号
-    password = 'xxx'  # 密码
+    username = ''  # 学号
+    password = ''  # 密码
     YQTB(username, password).run()
