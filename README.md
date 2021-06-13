@@ -1,4 +1,4 @@
-## 方式1：服务器部署
+## 方式1
 1、下载代码  
 ```shell
 git clone https://github.com/Chaney1024/YQTB.git
@@ -9,7 +9,7 @@ cd YQTB && pip3 install -r requirements.txt
 ```
 3、修改```index.py```文件中的学号密码  
   
-  
+
 4、测试执行  
 ```shell
 python3 index.py
@@ -23,7 +23,6 @@ crontab -e
 30 8,10 * * * python3 /path/index.py
 ```
 ```30 8,10 * * *``` 表示每天8:30,10:30各执行一次
-
 ## 方式2：云函数部署
 >> 腾讯云函数有免费额度，不需要充值  
 

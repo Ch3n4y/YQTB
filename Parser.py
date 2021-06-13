@@ -73,9 +73,7 @@ class Parser1:
                           'fieldCXXXjtzzs': None, 'fieldCXXXjtzzs_Name': None, 'fieldCXXXjtzz': None,
                           'fieldCXXXjtzz_Name': None,
                           'fieldSTQKqtqksm': None, 'fieldSHENGYC': None, 'fieldYCFDY': None, 'fieldYCBZ': None,
-                          'fieldYCBJ': None,
-                          # 新增：获取网址发过来的随机码
-                          'fieldLYYZM': None,
+                          'fieldYCBJ': None, 'fieldLYYZM': None,
                           }
         self.data = data
 
@@ -139,9 +137,14 @@ class Parser1:
             '_VAR_ENTRY_NAME': '学生健康状况申报_',
             '_VAR_ENTRY_TAGS': '疫情应用,移动端',
             'fieldCNS': True,
+            # 针对目前新设置的核酸检测，个人感觉会是临时的，到时候疫情过去这块直接删掉即可。
+            'fieldJCSJ': '1623081600',  # 6月8日 核酸检测
+            'fieldYZNSFJCHS': '1',  # 一周内是否做过核酸检测 1：是 2：否；若选择否，上面的日期也可不填写
+            'fieldJKMsfwlm': '1',  # 健康码是否为绿码 1：是 2：否； 若选择否还需要上传健康码截图
         }
         post_data_info = dict(post_data1, **post_data2)
         return post_data_info
+
 
 class Parser2:
     def __init__(self, data):
