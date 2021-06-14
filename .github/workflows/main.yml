@@ -1,7 +1,6 @@
 name: Auto report
 
 on: 
-  push:
   workflow_dispatch:
   #每天早上8:30和下午4:30自动执行
   schedule:
@@ -42,9 +41,9 @@ jobs:
       with:
         server_address: smtp.163.com
         server_port: 465
-        username: ${{ secrets.MAIL_USERNAME }}          
+        username: ${{ secrets.MAIL_USERNAME }}    
         password: ${{ secrets.MAIL_PASSWORD }}
         subject: 健康打卡——失败
-        # body: file://email.txt
-        to: jw.life@qq.com
+        # 默认发送给自己，可自定义
+        to: ${{ secrets.MAIL_USERNAME }}
         from: GitHub Actions

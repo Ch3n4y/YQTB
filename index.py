@@ -313,6 +313,7 @@ class YQTB:
                 self.notify('系统错误')
         else:
             self.notify('账号或密码错误')
+            sys.exit(1)
 
         logger.info('任务执行完毕')
 
