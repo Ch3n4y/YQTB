@@ -16,8 +16,24 @@ from requests.adapters import HTTPAdapter
 
 import logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s: - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
+
+# 使用FileHandler输出到文件
+fh = logging.FileHandler('log.txt')
+fh.setFormatter(formatter)
+
+# 使用StreamHandler输出到控制台
+sh = logging.StreamHandler()
+sh.setFormatter(formatter)
+
+logger.addHandler(sh)
+logger.addHandler(fh)
 
 # 链接超时时间
 TIMEOUT = 10
@@ -30,12 +46,18 @@ RETRY_INTERVAL = 10
 class YQTB:
     # 初始化参数
     def __init__(self):
-        self.APP_ID = os.environ['APP_ID']
-        self.API_KEY = os.environ['API_KEY']
-        self.SECRET_KEY = os.environ['SECRET_KEY']
-        self.SCKEY = os.environ['SCKEY']
-        self.username = os.environ['USERNAME']  # 学号
-        self.password = os.environ['PASSWORD']  # 密码
+        try:
+            self.APP_ID = os.environ['APP_ID']
+            self.API_KEY = os.environ['API_KEY']
+            self.SECRET_KEY = os.environ['SECRET_KEY']
+            self.SCKEY = os.environ['SCKEY']
+            self.username = os.environ['USERNAME']  # 学号
+            self.password = os.environ['PASSWORD']  # 密码
+        except Exception as e:
+            logger.warning(e)
+            logger.warning('无法获取环境变量，程序终止')
+            sys.exit(1)
+
         self.csrfToken = ''
         self.formStepId = ''
         self.formUrl = ''
@@ -309,9 +331,14 @@ class YQTB:
                     self.notify('打卡成功')
                 else:
                     self.notify('打卡失败')
+                    logger.warning('打卡失败')
+                    sys.exit(1)
             else:
+                logger.warning('系统错误，程序终止')
                 self.notify('系统错误')
+                sys.exit(1)
         else:
+            logger.warning('登录失败，程序终止')
             self.notify('账号或密码错误')
             sys.exit(1)
 

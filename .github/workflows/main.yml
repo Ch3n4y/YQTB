@@ -44,6 +44,7 @@ jobs:
         username: ${{ secrets.MAIL_USERNAME }}    
         password: ${{ secrets.MAIL_PASSWORD }}
         subject: 健康打卡——失败
+        body: file://log.txt
         # 默认发送给自己，可自定义
         to: ${{ secrets.MAIL_USERNAME }}
         from: GitHub Actions
