@@ -24,6 +24,7 @@ class YQTB:
         self.APP_ID = os.environ['APP_ID']
         self.API_KEY = os.environ['API_KEY']
         self.SECRET_KEY = os.environ['SECRET_KEY']
+        self.SCKEY = os.environ['SCKEY']
         self.username = os.environ['USERNAME']  # 学号
         self.password = os.environ['PASSWORD']  # 密码
         self.csrfToken = ''
@@ -266,14 +267,15 @@ class YQTB:
 
     # 消息推送
     def notify(self, msg):
-        print(msg)
+        data = {'text': msg}
+        req = requests.post(
+            url='https://sc.ftqq.com/'+self.SCKEY'.send', data=data)
 
     # 开始运行
     def run(self):
         logger.info('开始执行任务')
         res = self.login()
         if res:
-            return
             res2 = self.prepare()
             if res2:
                 res3 = self.start()
