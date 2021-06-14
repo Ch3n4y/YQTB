@@ -1,0 +1,45 @@
+name: Auto report
+
+on: 
+  workflow_dispatch:
+  #每天早上8:30和下午4:30自动执行
+  schedule:
+    - cron: '30 8,16 * * *'
+
+jobs:
+  build:
+    name: report
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run report script
+      env:
+        USERNAME: ${{ secrets.USERNAME }}
+        PASSWORD: ${{ secrets.PASSWORD }}
+      run: |
+        python index.py "$USERNAME" "$PASSWORD"
+
+    - name: 'Send mail'
+      uses: dawidd6/action-send-mail@master
+      with:
+        server_address: smtp.163.com
+        server_port: 465
+        username: ${{ secrets.MAIL_USERNAME }}    
+        password: ${{ secrets.MAIL_PASSWORD }}
+        subject: file://result.txt
+        body: file://log.txt
+        # 默认发送给自己，可自定义
+        to: ${{ secrets.MAIL_USERNAME }}
+        from: GitHub Actions

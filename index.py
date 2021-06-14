@@ -10,11 +10,32 @@ from urllib import parse
 import requests
 from bs4 import BeautifulSoup
 from Parser import Parser1, Parser2
-
+import sys
 import logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s: - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
+
+# 使用FileHandler输出到文件
+fh = logging.FileHandler('log.txt')
+fh.setFormatter(formatter)
+
+# 使用StreamHandler输出到控制台
+sh = logging.StreamHandler()
+sh.setFormatter(formatter)
+
+logger.addHandler(sh)
+logger.addHandler(fh)
+
+# 链接超时时间
+TIMEOUT = 10
+# 连接失败时重试的次数
+RETRY = 5
+# 失败重试的间隔
+RETRY_INTERVAL = 10
 
 
 class YQTB:
@@ -70,21 +91,21 @@ class YQTB:
             'key': 'b42fb9486f3c10e8654072f0648e694f',
             'image': image,
         }
-        response = requests.post(url, data=payload)
-        return response.json()
+        response = requests.post(url, data=payload, timeout=TIMEOUT).json()
+        return response['result']
 
     # 获取验证码
     def captcha(self):
         logger.info('验证码识别')
-        image = self.client.get(url='https://cas.gzhu.edu.cn/cas_server/captcha.jsp')
+        image = self.client.get(
+            url='https://cas.gzhu.edu.cn/cas_server/captcha.jsp', timeout=TIMEOUT)
         base_data = base64.encodebytes(image.content)
-        res = self.ocr(base_data)
-        return res['result']
+        return self.ocr(base_data)
 
     # 登陆账号
     def login(self):
         logger.info('开始登陆')
-        res = self.client.get(url="http://yqtb.gzhu.edu.cn/")
+        res = self.client.get(url="http://yqtb.gzhu.edu.cn/",timeout=TIMEOUT)
         soup = BeautifulSoup(res.text, "html.parser")
         form = soup.find_all('input')
         post_url = soup.find('form')['action']
@@ -107,14 +128,15 @@ class YQTB:
                 logger.warning('账号或密码错误')
                 return False
             logger.warning('验证码错误，尝试重新登陆')
-            self.login()
+            return False
         logger.info('登陆成功')
         return True
 
     # 准备数据
     def prepare(self):
         logger.info("准备数据")
-        res = self.client.get(url="http://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true")
+        res = self.client.get(
+            url="http://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true", timeout=TIMEOUT)
         soup = BeautifulSoup(res.content.decode('utf-8'), 'html.parser')
         self.csrfToken = soup.find(attrs={"itemscope": "csrfToken"})['content']
         self.formStepId = re.findall(r"\d+", res.url)[0]
@@ -250,16 +272,34 @@ class YQTB:
 
         if res1.json()['errno'] or res2.json()['errno']:
             return False
+        logger.info('打卡成功')
         return True
 
     # 消息推送
     def notify(self, msg):
-        print(msg)
+        f = open("result.txt", 'w')
+        if msg == '打卡成功':
+            f.write('健康打卡——成功\n')
+        else:
+            f.write('健康打卡——失败\n')
+            logger.warning(msg)
+            sys.exit(1)
 
     # 开始运行
     def run(self):
         logger.info('开始执行任务')
-        res = self.login()
+        res = False
+        # 登录失败则重试
+        for _ in range(RETRY):
+            try:
+                res = self.login()
+            except Exception as e:
+                logger.warning(e)
+                time.sleep(RETRY_INTERVAL)
+                continue
+            if res:
+                break
+        
         if res:
             res2 = self.prepare()
             if res2:
@@ -286,6 +326,11 @@ def main_handler(event, context):
 
 # 本地测试
 if __name__ == '__main__':
-    username = 'XXX'  # 学号
-    password = 'XXX'  # 密码
+    try:
+        username = os.environ['USERNAME']  # 学号
+        password = os.environ['PASSWORD']  # 密码
+    except Exception as e:
+        logger.warning(e)
+        logger.warning('无法获取账户密码，程序终止')
+        sys.exit(1)
     YQTB(username, password).run()
