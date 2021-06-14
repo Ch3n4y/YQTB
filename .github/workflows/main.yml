@@ -32,5 +32,6 @@ jobs:
         APP_ID: ${{ secrets.APP_ID }}
         API_KEY: ${{ secrets.API_KEY }}
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        SCKEY: ${{secrets.SCKEY}}
       run: |
-        python index.py "$USERNAME" "$PASSWORD" "$APP_ID" "$API_KEY" "$SECRET_KEY"
+        python index.py "$USERNAME" "$PASSWORD" "$APP_ID" "$API_KEY" "$SECRET_KEY" "$SCKEY"
