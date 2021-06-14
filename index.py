@@ -286,6 +286,9 @@ def main_handler(event, context):
 
 # 本地测试
 if __name__ == '__main__':
-    username = 'XXX'  # 学号
-    password = 'XXX'  # 密码
+    try:
+        username = os.environ['USERNAME']  # 学号
+        password = os.environ['PASSWORD']  # 密码
+    except:
+        print("无法获取用户名和密码")
     YQTB(username, password).run()
