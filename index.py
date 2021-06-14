@@ -277,13 +277,8 @@ class YQTB:
 
     # 消息推送
     def notify(self, msg):
-        f = open("result.txt", 'w')
-        if msg == '打卡成功':
-            f.write('健康打卡——成功\n')
-        else:
-            f.write('健康打卡——失败\n')
-            logger.warning(msg)
-            sys.exit(1)
+        logger.warning(msg)
+        sys.exit(1)
 
     # 开始运行
     def run(self):
@@ -304,9 +299,7 @@ class YQTB:
             res2 = self.prepare()
             if res2:
                 res3 = self.start()
-                if res3:
-                    self.notify('打卡成功')
-                else:
+                if not res3:
                     self.notify('打卡失败')
             else:
                 self.notify('系统错误')
