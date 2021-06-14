@@ -269,7 +269,7 @@ class YQTB:
     def notify(self, msg):
         data = {'text': msg}
         req = requests.post(
-            url='https://sc.ftqq.com/'+self.SCKEY'.send', data=data)
+            url='https://sc.ftqq.com/'+ self.SCKEY + '.send', data=data)
 
     # 开始运行
     def run(self):
