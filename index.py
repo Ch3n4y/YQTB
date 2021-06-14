@@ -5,17 +5,26 @@ import json
 import random
 import re
 import os
+import sys
 import time
 from urllib import parse
 import requests
 from bs4 import BeautifulSoup
 from Parser import Parser1, Parser2
 from aip import AipOcr
+from requests.adapters import HTTPAdapter
 
 import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# 链接超时时间
+TIMEOUT = 10
+# 连接失败时重试的次数
+RETRY = 5
+# 每次连接的间隔
+RETRY_INTERVAL = 10
 
 
 class YQTB:
@@ -97,7 +106,7 @@ class YQTB:
     # 登陆账号
     def login(self):
         logger.info('开始登陆')
-        res = self.client.get(url="http://yqtb.gzhu.edu.cn/")
+        res = self.client.get(url="http://yqtb.gzhu.edu.cn/", timeout=TIMEOUT)
         soup = BeautifulSoup(res.text, "html.parser")
         form = soup.find_all('input')
         post_url = soup.find('form')['action']
@@ -117,17 +126,20 @@ class YQTB:
             # 账号或密码错误
             msg = soup.select('#msg')[0].text
             if msg == '账号或密码错误':
-                logger.warning('账号或密码错误')
-                return False
+                logger.warning('账号或密码错误，程序终止')
+                self.notify('打卡失败——账号或密码错误')
+                # 直接退出程序
+                sys.exit(1)
             logger.warning('验证码错误，尝试重新登陆')
-            self.login()
+            return False
         logger.info('登陆成功')
         return True
 
     # 准备数据
     def prepare(self):
         logger.info("准备数据")
-        res = self.client.get(url="http://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true")
+        res = self.client.get(
+            url="http://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true", timeout=TIMEOUT)
         soup = BeautifulSoup(res.content.decode('utf-8'), 'html.parser')
         self.csrfToken = soup.find(attrs={"itemscope": "csrfToken"})['content']
         self.formStepId = re.findall(r"\d+", res.url)[0]
@@ -268,13 +280,27 @@ class YQTB:
     # 消息推送
     def notify(self, msg):
         data = {'text': msg}
-        req = requests.post(
-            url='https://sc.ftqq.com/'+ self.SCKEY + '.send', data=data)
+        try:
+            req = requests.post(url='https://sc.ftqq.com/' +
+                         self.SCKEY + '.send', data = data)
+        except Exception as e:
+            logger.warning(e)
+            sys.exit(1)
 
     # 开始运行
     def run(self):
         logger.info('开始执行任务')
-        res = self.login()
+        res = False
+        # 登录失败则重试
+        for _ in range(RETRY):
+            try:
+                res = self.login()
+            except Exception as e:
+                logger.warning(e)
+                time.sleep(RETRY_INTERVAL)
+                continue
+            if res:
+                break
         if res:
             res2 = self.prepare()
             if res2:
