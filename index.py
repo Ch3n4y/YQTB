@@ -10,6 +10,7 @@ from urllib import parse
 import requests
 from bs4 import BeautifulSoup
 from Parser import Parser1, Parser2
+from aip import AipOcr
 
 import logging
 
@@ -19,9 +20,12 @@ logger = logging.getLogger(__name__)
 
 class YQTB:
     # 初始化参数
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
+    def __init__(self):
+        self.APP_ID = os.environ['APP_ID']
+        self.API_KEY = os.environ['API_KEY']
+        self.SECRET_KEY = os.environ['SECRET_KEY']
+        self.username = os.environ['USERNAME']  # 学号
+        self.password = os.environ['PASSWORD']  # 密码
         self.csrfToken = ''
         self.formStepId = ''
         self.formUrl = ''
@@ -64,22 +68,30 @@ class YQTB:
         }
 
     # 识别验证码
+    # def ocr(self, image):
+    #     url = "https://api2.chaney.top/release/gzhu"
+    #     payload = {
+    #         'key': 'b42fb9486f3c10e8654072f0648e694f',
+    #         'image': image,
+    #     }
+    #     response = requests.post(url, data=payload)
+    #     return response.json()
+
+    #百度OCR识别验证码
     def ocr(self, image):
-        url = "https://api2.chaney.top/release/gzhu"
-        payload = {
-            'key': 'b42fb9486f3c10e8654072f0648e694f',
-            'image': image,
-        }
-        response = requests.post(url, data=payload)
-        return response.json()
+        aipClient = AipOcr(self.APP_ID, self.API_KEY, self.SECRET_KEY)  # 创建连接
+        res = aipClient.numbers(image, options=None)
+        vcode = ""
+        for tex in res["words_result"]:  # 遍历结果
+            vcode += tex["words"]
+        return vcode  # 输出内容
 
     # 获取验证码
     def captcha(self):
         logger.info('验证码识别')
-        image = self.client.get(url='https://cas.gzhu.edu.cn/cas_server/captcha.jsp')
-        base_data = base64.encodebytes(image.content)
-        res = self.ocr(base_data)
-        return res['result']
+        image = self.client.get(
+                url='https://cas.gzhu.edu.cn/cas_server/captcha.jsp')
+        return self.ocr(image.content)
 
     # 登陆账号
     def login(self):
@@ -261,6 +273,7 @@ class YQTB:
         logger.info('开始执行任务')
         res = self.login()
         if res:
+            return
             res2 = self.prepare()
             if res2:
                 res3 = self.start()
@@ -286,9 +299,4 @@ def main_handler(event, context):
 
 # 本地测试
 if __name__ == '__main__':
-    try:
-        username = os.environ['USERNAME']  # 学号
-        password = os.environ['PASSWORD']  # 密码
-    except:
-        print("无法获取用户名和密码")
-    YQTB(username, password).run()
+    YQTB().run()
