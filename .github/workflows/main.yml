@@ -2,9 +2,9 @@ name: Auto report
 
 on: 
   workflow_dispatch:
-  #每天早上8:30和下午4:30自动执行
+  #北京时间每天早上8:30和下午4:30自动执行，Github Action默认国际标准时间
   schedule:
-    - cron: '30 8,16 * * *'
+    - cron: '30 0,8 * * *'
 
 jobs:
   build:
