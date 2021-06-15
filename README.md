@@ -51,3 +51,44 @@ crontab -e
 详细配置可查看[Cron 表达式](https://cloud.tencent.com/document/product/583/9708#cron-.E8.A1.A8.E8.BE.BE.E5.BC.8F)  
 ![20210412124622](https://img.chaney.top/images/20210412124622.png)  
 **完成**
+## 方式3：Github Actions
+### Step1. Fork 本代码库
+
+### Step2. 注册163邮箱
+
+默认采用163邮箱，如有需要，自行更改[main.yml](.github\workflows\main.yml)文件
+
+注册163邮箱后在设置界面开启POP3/SMTP服务，并记下授权码
+
+[![2q1hrD.png](https://z3.ax1x.com/2021/06/15/2q1hrD.png)](https://imgtu.com/i/2q1hrD)
+
+### Step3. 配置 Secret
+
+在 Settings - Secrets 页面添加如下内容：
+
+- `USERNAME`：学号
+- `PASSWORD`：密码
+- `MAIL_USERNAME`：邮箱账号
+- `MAIL_PASSWORD`：上一步记录的授权码
+
+[![2q1cP1.png](https://z3.ax1x.com/2021/06/15/2q1cP1.png)](https://imgtu.com/i/2q1cP1)
+
+确保添加后有这四个Secret
+
+[![2q3VLF.png](https://z3.ax1x.com/2021/06/15/2q3VLF.png)](https://imgtu.com/i/2q3VLF)
+
+### Step4. 开启workflow
+
+[![2q8aBF.jpg](https://z3.ax1x.com/2021/06/15/2q8aBF.jpg)](https://imgtu.com/i/2q8aBF)
+
+### Step5. 运行效果
+
+默认每天早上8：30分开始打卡，成功或者失败都会发送邮件通知
+
+如需修改打卡时间，在[main.yml](.github\workflows\main.yml)文件修改Cron 表达式即可
+
+> P.S：Github Actions 默认采用的是国际标准时间，与北京时间相差8小时，修改时注意转换
+
+邮件默认发送到`MAIL_USERNAME`字段填写的邮箱，如有需要，可以在[main.yml](.github\workflows\main.yml)文件修改发送的目的邮箱地址或者在163邮箱设置里添加邮件自动转发到指定地址
+
+[![2q8hAH.jpg](https://z3.ax1x.com/2021/06/15/2q8hAH.jpg)](https://imgtu.com/i/2q8hAH)
