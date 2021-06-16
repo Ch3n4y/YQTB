@@ -48,8 +48,9 @@ class YQTB:
         try:
             self.USERNAME = os.environ['USERNAME']  # 学号
             self.PASSWORD = os.environ['PASSWORD']  # 密码
+            if self.USERNAME == '' or self.PASSWORD == '':
+                raise ValueError("无法获取学号和密码")
         except Exception as e:
-            logger.warning(e)
             logger.warning('无法获取学号和密码，程序终止')
             sys.exit(1)
         self.csrfToken = ''
@@ -110,6 +111,8 @@ class YQTB:
             self.APP_ID = os.environ['APP_ID']
             self.API_KEY = os.environ['API_KEY']
             self.SECRET_KEY = os.environ['SECRET_KEY']
+            if self.APP_ID == '' or self.API_KEY == '' or self.SECRET_KEY == '':
+                raise ValueError("未配置百度OCR")
         except:
             logger.info('未配置百度OCR，采用默认验证码识别')
             return self.defaultOcr(image)
@@ -171,7 +174,8 @@ class YQTB:
         self.formUrl = res.url
         # 温馨提示
         if self.formStepId == '1':
-            self.workflowId = re.findall(r"workflowId = \"(.*?)\"", res.content.decode('utf-8'))[0]
+            self.workflowId = re.findall(
+                r"workflowId = \"(.*?)\"", res.content.decode('utf-8'))[0]
             url = "http://yqtb.gzhu.edu.cn/infoplus/interface/preview"
             payload = {
                 'workflowId': self.workflowId,
@@ -307,13 +311,17 @@ class YQTB:
     def notify(self, msg):
         try:
             self.SCKEY = os.environ['SCKEY']
+            if self.SCKEY == '':
+                raise ValueError("未提供SCKEY")
             self.serverNotify(msg)
-        except KeyError:
+        except:
             logger.info('您未提供Server酱的SCKEY，取消微信推送消息通知')
         try:
             self.PUSH_PLUS_TOKEN = os.environ['PUSH_PLUS_TOKEN']
+            if self.SCKEY == '':
+                raise ValueError("未提供PUSH_PLUS_TOKEN")
             self.pushNotify(msg)
-        except KeyError:
+        except:
             logger.info('您未提供Push+的PUSH_PLUS_TOKEN，取消push+推送消息通知')
 
     def pushNotify(self, msg):
@@ -365,8 +373,6 @@ class YQTB:
             if res:
                 break
         if res:
-            self.notify('test成功')
-            return
             res2 = self.prepare()
             if res2:
                 res3 = self.start()
@@ -391,9 +397,7 @@ class YQTB:
 # 云函数
 def main_handler(event, context):
     logger.info('got event{}'.format(event))
-    username = os.getenv('USERNAME')  # 学号
-    password = os.getenv('PASSWORD')  # 密码
-    YQTB(username, password).run()
+    YQTB().run()
 
 
 # 本地测试
