@@ -318,7 +318,7 @@ class YQTB:
             logger.info('您未提供Server酱的SCKEY，取消微信推送消息通知')
         try:
             self.PUSH_PLUS_TOKEN = os.environ['PUSH_PLUS_TOKEN']
-            if self.SCKEY == '':
+            if self.PUSH_PLUS_TOKEN == '':
                 raise ValueError("未提供PUSH_PLUS_TOKEN")
             self.pushNotify(msg)
         except:
