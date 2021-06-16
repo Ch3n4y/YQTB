@@ -10,6 +10,7 @@ jobs:
   report:
     env:
       PAT: ${{ secrets.PAT || github.event.client_payload.PAT }}
+      MAIL: ${{ secrets.MAIL_USERNAME || github.event.client_payload.MAIL_USERNAME }}
     name: report
     runs-on: ubuntu-latest
     steps:
@@ -20,12 +21,12 @@ jobs:
       
     - name: repo-sync
       uses: repo-sync/github-sync@v2
-      # if: ${{ secrets.PAT }}
+      if:  env.PAT 
       with:
         source_repo: "https://github.com/JacobZjw/YQTB.git"
         source_branch: "master"
         destination_branch: "master"
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.PAT }}
 
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
@@ -51,7 +52,7 @@ jobs:
   
     - name: 'Send mail of success'
       uses: dawidd6/action-send-mail@master
-      if: ${{ success() }}
+      if: ${{ env.MAIL && success() }}
       with:
         server_address: smtp.163.com
         server_port: 465
@@ -65,7 +66,7 @@ jobs:
 
     - name: 'Send mail of failure'
       uses: dawidd6/action-send-mail@master
-      if: ${{ failure() }}
+      if: ${{ env.MAIL && failure() }}
       with:
         server_address: smtp.163.com
         server_port: 465

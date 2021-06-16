@@ -39,7 +39,7 @@ TIMEOUT = 10
 # 登录失败时重试的次数
 RETRY = 10
 # 每次连接的间隔
-RETRY_INTERVAL = 10
+RETRY_INTERVAL = 5
 
 
 class YQTB:
@@ -309,12 +309,12 @@ class YQTB:
             self.SCKEY = os.environ['SCKEY']
             self.serverNotify(msg)
         except KeyError:
-            logger.info('您未提供server酱的SCKEY，取消微信推送消息通知')
+            logger.info('您未提供Server酱的SCKEY，取消微信推送消息通知')
         try:
             self.PUSH_PLUS_TOKEN = os.environ['PUSH_PLUS_TOKEN']
             self.pushNotify(msg)
         except KeyError:
-            logger.info('您未提供push+的PUSH_PLUS_TOKEN，取消push+推送消息通知')
+            logger.info('您未提供Push+的PUSH_PLUS_TOKEN，取消push+推送消息通知')
 
     def pushNotify(self, msg):
         url = 'http://www.pushplus.plus/send'
