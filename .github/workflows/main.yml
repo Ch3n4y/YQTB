@@ -7,7 +7,7 @@ on:
     - cron: '30 0 * * *'
 
 jobs:
-  build:
+  report:
     env:
       PAT: ${{ secrets.PAT || github.event.client_payload.PAT }}
     name: report

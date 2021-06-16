@@ -329,14 +329,14 @@ class YQTB:
             url, data=body, headers=headers).json(), ensure_ascii=False)
         datas = json.loads(response)
         if datas['code'] == 200:
-            logger.info('push+发送通知消息成功')
-        if datas['code'] == 600:
-            logger.warning('PUSH_PLUS_TOKEN 错误')
+            logger.info('【Push+】发送通知消息成功')
+        elif datas['code'] == 600:
+            logger.warning('【Push+】PUSH_PLUS_TOKEN 错误')
         else:
-            logger.warning('push+发送通知调用API失败！！')
+            logger.warning('【Push+】发送通知调用API失败！！')
 
     def serverNotify(self, msg):
-        url = 'https://sctapi.ftqq.com/' + self.SCKEY + '.send'
+        url = 'https://sc.ftqq.com/' + self.SCKEY + '.send'
         data = {
             'text': msg,
         }
@@ -344,11 +344,11 @@ class YQTB:
             url, data).json(), ensure_ascii=False)
         datas = json.loads(response)
         if datas['code'] == 0:
-            logger.info('server酱发送通知消息成功')
+            logger.info('【Server酱】发送通知消息成功')
         elif datas['code'] == 40001:
-            logger.warning('PUSH_KEY 错误')
+            logger.warning('【Server酱】SCKEY 错误')
         else:
-            logger.warning('发送通知调用API失败！！')
+            logger.warning('【Server酱】发送通知调用API失败！！')
 
     # 开始运行
     def run(self):
@@ -365,6 +365,8 @@ class YQTB:
             if res:
                 break
         if res:
+            self.notify('test成功')
+            return
             res2 = self.prepare()
             if res2:
                 res3 = self.start()
