@@ -16,8 +16,7 @@ from requests.adapters import HTTPAdapter
 
 import logging
 
-# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# logger = logging.getLogger(__name__)
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter(
@@ -25,7 +24,7 @@ formatter = logging.Formatter(
     datefmt='%Y-%m-%d %H:%M:%S')
 
 # 使用FileHandler输出到文件
-fh = logging.FileHandler('log.txt')
+fh = logging.FileHandler('log.txt', encoding='utf-8')
 fh.setFormatter(formatter)
 
 # 使用StreamHandler输出到控制台
@@ -35,10 +34,10 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 logger.addHandler(fh)
 
-# 链接超时时间
+# 连接超时时间
 TIMEOUT = 10
-# 连接失败时重试的次数
-RETRY = 5
+# 登录失败时重试的次数
+RETRY = 10
 # 每次连接的间隔
 RETRY_INTERVAL = 10
 
@@ -47,17 +46,12 @@ class YQTB:
     # 初始化参数
     def __init__(self):
         try:
-            self.APP_ID = os.environ['APP_ID']
-            self.API_KEY = os.environ['API_KEY']
-            self.SECRET_KEY = os.environ['SECRET_KEY']
-            self.SCKEY = os.environ['SCKEY']
-            self.username = os.environ['USERNAME']  # 学号
-            self.password = os.environ['PASSWORD']  # 密码
+            self.USERNAME = os.environ['USERNAME']  # 学号
+            self.PASSWORD = os.environ['PASSWORD']  # 密码
         except Exception as e:
             logger.warning(e)
-            logger.warning('无法获取环境变量，程序终止')
+            logger.warning('无法获取学号和密码，程序终止')
             sys.exit(1)
-
         self.csrfToken = ''
         self.formStepId = ''
         self.formUrl = ''
@@ -100,17 +94,26 @@ class YQTB:
         }
 
     # 识别验证码
-    # def ocr(self, image):
-    #     url = "https://api2.chaney.top/release/gzhu"
-    #     payload = {
-    #         'key': 'b42fb9486f3c10e8654072f0648e694f',
-    #         'image': image,
-    #     }
-    #     response = requests.post(url, data=payload)
-    #     return response.json()
+    def defaultOcr(self, image):
+        image = base64.encodebytes(image)
+        url = "https://api2.chaney.top/release/gzhu"
+        payload = {
+            'key': 'b42fb9486f3c10e8654072f0648e694f',
+            'image': image,
+        }
+        response = requests.post(url, data=payload, timeout=TIMEOUT).json()
+        return response['result']
 
-    #百度OCR识别验证码
+    # 百度OCR识别验证码
     def ocr(self, image):
+        try:
+            self.APP_ID = os.environ['APP_ID']
+            self.API_KEY = os.environ['API_KEY']
+            self.SECRET_KEY = os.environ['SECRET_KEY']
+        except:
+            logger.info('未配置百度OCR，采用默认验证码识别')
+            return self.defaultOcr(image)
+
         aipClient = AipOcr(self.APP_ID, self.API_KEY, self.SECRET_KEY)  # 创建连接
         res = aipClient.numbers(image, options=None)
         vcode = ""
@@ -122,7 +125,7 @@ class YQTB:
     def captcha(self):
         logger.info('验证码识别')
         image = self.client.get(
-                url='https://cas.gzhu.edu.cn/cas_server/captcha.jsp')
+            url='https://cas.gzhu.edu.cn/cas_server/captcha.jsp', timeout=TIMEOUT)
         return self.ocr(image.content)
 
     # 登陆账号
@@ -138,8 +141,8 @@ class YQTB:
         del post_data['reset']
         login_post_url = parse.urljoin(res.url, post_url)
 
-        post_data['username'] = self.username
-        post_data['password'] = self.password
+        post_data['username'] = self.USERNAME
+        post_data['password'] = self.PASSWORD
         post_data['captcha'] = self.captcha()
         res = self.client.post(url=login_post_url, data=post_data)
         soup = BeautifulSoup(res.content.decode('utf-8'), 'html.parser')
@@ -246,7 +249,8 @@ class YQTB:
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,und;q=0.7',
             'Connection': 'close'
         }
-        res = self.client.post(url="http://yqtb.gzhu.edu.cn/infoplus/interface/render", headers=headers, data=post_data)
+        res = self.client.post(
+            url="http://yqtb.gzhu.edu.cn/infoplus/interface/render", headers=headers, data=post_data)
         self.getDatas = res.json()
         return True
 
@@ -301,13 +305,50 @@ class YQTB:
 
     # 消息推送
     def notify(self, msg):
-        data = {'text': msg}
         try:
-            req = requests.post(url='https://sc.ftqq.com/' +
-                         self.SCKEY + '.send', data = data)
-        except Exception as e:
-            logger.warning(e)
-            sys.exit(1)
+            self.SCKEY = os.environ['SCKEY']
+            self.serverNotify(msg)
+        except KeyError:
+            logger.info('您未提供server酱的SCKEY，取消微信推送消息通知')
+        try:
+            self.PUSH_PLUS_TOKEN = os.environ['PUSH_PLUS_TOKEN']
+            self.pushNotify(msg)
+        except KeyError:
+            logger.info('您未提供push+的PUSH_PLUS_TOKEN，取消push+推送消息通知')
+
+    def pushNotify(self, msg):
+        url = 'http://www.pushplus.plus/send'
+        data = {
+            "token": self.PUSH_PLUS_TOKEN,
+            "title": '健康打卡',
+            "content": msg
+        }
+        body = json.dumps(data).encode(encoding='utf-8')
+        headers = {'Content-Type': 'application/json'}
+        response = json.dumps(requests.post(
+            url, data=body, headers=headers).json(), ensure_ascii=False)
+        datas = json.loads(response)
+        if datas['code'] == 200:
+            logger.info('push+发送通知消息成功')
+        if datas['code'] == 600:
+            logger.warning('PUSH_PLUS_TOKEN 错误')
+        else:
+            logger.warning('push+发送通知调用API失败！！')
+
+    def serverNotify(self, msg):
+        url = 'https://sctapi.ftqq.com/' + self.SCKEY + '.send'
+        data = {
+            'text': msg,
+        }
+        response = json.dumps(requests.post(
+            url, data).json(), ensure_ascii=False)
+        datas = json.loads(response)
+        if datas['code'] == 0:
+            logger.info('server酱发送通知消息成功')
+        elif datas['code'] == 40001:
+            logger.warning('PUSH_KEY 错误')
+        else:
+            logger.warning('发送通知调用API失败！！')
 
     # 开始运行
     def run(self):

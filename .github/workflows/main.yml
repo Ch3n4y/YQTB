@@ -1,10 +1,10 @@
-name: Auto report
+name: 自动打卡
 
 on: 
   workflow_dispatch:
-  #北京时间每天早上8:30和下午4:30自动执行，Github Action默认国际标准时间
+  #北京时间每天早上8:30自动执行，Github Action默认国际标准时间
   schedule:
-    - cron: '30 0,8 * * *'
+    - cron: '30 0 * * *'
 
 jobs:
   build:
@@ -13,6 +13,17 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+      
+    - name: repo-sync
+      uses: repo-sync/github-sync@v2
+      # if: ${{ secrets.PAT }}
+      with:
+        source_repo: "https://github.com/JacobZjw/YQTB.git"
+        source_branch: "master"
+        destination_branch: "master"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
@@ -32,12 +43,27 @@ jobs:
         API_KEY: ${{ secrets.API_KEY }}
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         SCKEY: ${{secrets.SCKEY}}
+        PUSH_PLUS_TOKEN: ${{ secrets.PUSH_PLUS_TOKEN }}
       run: |
-        python index.py "$USERNAME" "$PASSWORD" "$APP_ID" "$API_KEY" "$SECRET_KEY" "$SCKEY"
-
-    - name: 'Send mail'
+        python index.py
+  
+    - name: 'Send mail of success'
       uses: dawidd6/action-send-mail@master
-      if: ${{ failure() }}
+      if: ${{ secrets.MAIL_USERNAME && success() }}
+      with:
+        server_address: smtp.163.com
+        server_port: 465
+        username: ${{ secrets.MAIL_USERNAME }}    
+        password: ${{ secrets.MAIL_PASSWORD }}
+        subject: 健康打卡——成功
+        body: file://log.txt
+        # 默认发送给自己，可自定义
+        to: ${{ secrets.MAIL_USERNAME }}
+        from: GitHub Actions
+
+    - name: 'Send mail of failure'
+      uses: dawidd6/action-send-mail@master
+      if: ${{ secrets.MAIL_USERNAME && failure() }}
       with:
         server_address: smtp.163.com
         server_port: 465
