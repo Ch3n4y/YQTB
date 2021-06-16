@@ -8,6 +8,8 @@ on:
 
 jobs:
   build:
+    env:
+      PAT: ${{ secrets.PAT || github.event.client_payload.PAT }}
     name: report
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +51,7 @@ jobs:
   
     - name: 'Send mail of success'
       uses: dawidd6/action-send-mail@master
-      if: ${{ secrets.MAIL_USERNAME && success() }}
+      if: ${{ success() }}
       with:
         server_address: smtp.163.com
         server_port: 465
@@ -63,7 +65,7 @@ jobs:
 
     - name: 'Send mail of failure'
       uses: dawidd6/action-send-mail@master
-      if: ${{ secrets.MAIL_USERNAME && failure() }}
+      if: ${{ failure() }}
       with:
         server_address: smtp.163.com
         server_port: 465
