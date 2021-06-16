@@ -52,7 +52,7 @@
 
 [![2q8hAH.jpg](https://z3.ax1x.com/2021/06/15/2q8hAH.jpg)](https://imgtu.com/i/2q8hAH)
 
-## 方式2
+## 方式2：
 1、下载代码  
 ```shell
 git clone https://github.com/Chaney1024/YQTB.git
@@ -77,7 +77,7 @@ crontab -e
 30 8,10 * * * python3 /path/index.py
 ```
 ```30 8,10 * * *``` 表示每天8:30,10:30各执行一次
-## 方式2：云函数部署
+## 方式3：云函数部署
 >> 腾讯云函数有免费额度，不需要充值  
 
 ### 1、登录[腾讯云](https://cloud.tencent.com/)
