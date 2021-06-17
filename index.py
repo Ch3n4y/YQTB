@@ -35,7 +35,7 @@ logger.addHandler(sh)
 logger.addHandler(fh)
 
 # 连接超时时间
-TIMEOUT = 10
+TIMEOUT = None
 # 登录失败时重试的次数
 RETRY = 10
 # 每次连接的间隔
@@ -58,6 +58,9 @@ class YQTB:
         self.formUrl = ''
         self.workflowId = ''
         self.client = requests.session()
+        self.client.trust_env = False
+        self.client.mount('http://', HTTPAdapter(max_retries=RETRY))
+        self.client.mount('https://', HTTPAdapter(max_retries=RETRY))
         self.boundFields = "fieldSTQKzdjgmc,fieldSTQKjtcyglkssj,fieldCXXXsftjhb,fieldzgzjzdzjtdz,fieldJCDDqmsjtdd," \
                            "fieldSHENGYC,fieldYQJLksjcsj,fieldSTQKjtcyzd,fieldJBXXjgsjtdz,fieldSTQKbrstzk," \
                            "fieldSTQKfrtw,fieldSTQKjtcyqt,fieldCXXXjtfslc,fieldJBXXlxfs,fieldSTQKpcsj,fieldJKHDDzt," \
@@ -87,8 +90,7 @@ class YQTB:
         self.client.headers = {
             'Proxy-Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, '
-                          'like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,'
                       '*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,und;q=0.7',
@@ -128,13 +130,15 @@ class YQTB:
     def captcha(self):
         logger.info('验证码识别')
         image = self.client.get(
-            url='https://cas.gzhu.edu.cn/cas_server/captcha.jsp', timeout=TIMEOUT)
+            url='https://cas.gzhu.edu.cn/cas_server/captcha.jsp')
         return self.ocr(image.content)
 
     # 登陆账号
     def login(self):
         logger.info('开始登陆')
-        res = self.client.get(url="http://yqtb.gzhu.edu.cn/", timeout=TIMEOUT)
+        res = self.client.get(url="http://yqtb.gzhu.edu.cn/")
+        if res.status_code != 200:
+            raise ConnectionError('无法连接到网站')
         soup = BeautifulSoup(res.text, "html.parser")
         form = soup.find_all('input')
         post_url = soup.find('form')['action']
@@ -167,7 +171,9 @@ class YQTB:
     def prepare(self):
         logger.info("准备数据")
         res = self.client.get(
-            url="http://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true", timeout=TIMEOUT)
+            url="http://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true")
+        if res.status_code != 200:
+            raise ConnectionError('无法连接到网站')
         soup = BeautifulSoup(res.content.decode('utf-8'), 'html.parser')
         self.csrfToken = soup.find(attrs={"itemscope": "csrfToken"})['content']
         self.formStepId = re.findall(r"\d+", res.url)[0]
@@ -322,7 +328,7 @@ class YQTB:
                 raise ValueError("未提供PUSH_PLUS_TOKEN")
             self.pushNotify(msg)
         except:
-            logger.info('您未提供Push+的PUSH_PLUS_TOKEN，取消push+推送消息通知')
+            logger.info('您未提供Push+的PUSH_PLUS_TOKEN，取消Push+推送消息通知')
 
     def pushNotify(self, msg):
         url = 'http://www.pushplus.plus/send'
@@ -360,38 +366,21 @@ class YQTB:
 
     # 开始运行
     def run(self):
-        logger.info('开始执行任务')
-        res = False
-        # 登录失败则重试
-        for _ in range(RETRY):
-            try:
-                res = self.login()
-            except Exception as e:
-                logger.warning(e)
-                time.sleep(RETRY_INTERVAL)
-                continue
-            if res:
-                break
+        res = self.login()
         if res:
-            res2 = self.prepare()
-            if res2:
-                res3 = self.start()
-                if res3:
-                    self.notify('打卡成功')
-                else:
-                    self.notify('打卡失败')
-                    logger.warning('打卡失败')
-                    sys.exit(1)
-            else:
-                logger.warning('系统错误，程序终止')
-                self.notify('系统错误')
-                sys.exit(1)
+            res = self.prepare()
         else:
-            logger.warning('登录失败，程序终止')
-            self.notify('账号或密码错误')
-            sys.exit(1)
-
-        logger.info('任务执行完毕')
+            raise RuntimeError('登录失败')
+        if res:
+            res = self.start()
+        else:
+            raise RuntimeError('数据准备失败')
+        if res:
+            logger.info('打卡成功')
+            self.notify('打卡成功')
+            sys.exit(0)
+        else:
+            raise RuntimeError('数据提交失败')
 
 
 # 云函数
@@ -402,4 +391,15 @@ def main_handler(event, context):
 
 # 本地测试
 if __name__ == '__main__':
-    YQTB().run()
+    for _ in range(RETRY):
+        r = YQTB()
+        try:
+            r.run()
+        except Exception as e:
+            logger.error(e)
+            if _ == RETRY - 1:
+                r.notify('打卡失败')
+                sys.exit(1)
+            else:
+                time.sleep(RETRY_INTERVAL)
+                continue
