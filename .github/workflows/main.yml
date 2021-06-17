@@ -2,9 +2,9 @@ name: 自动打卡
 
 on: 
   workflow_dispatch:
-  #北京时间每天早上8:30自动执行，Github Action默认国际标准时间
+  #北京时间每天早上7:10自动执行，Github Action默认国际标准时间
   schedule:
-    - cron: '30 0 * * *'
+    - cron: '10 23 * * *'
 
 jobs:
   report:
