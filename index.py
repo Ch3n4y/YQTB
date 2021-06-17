@@ -35,7 +35,7 @@ logger.addHandler(sh)
 logger.addHandler(fh)
 
 # 连接超时时间
-TIMEOUT = None
+TIMEOUT = 10
 # 登录失败时重试的次数
 RETRY = 10
 # 每次连接的间隔
@@ -59,8 +59,8 @@ class YQTB:
         self.workflowId = ''
         self.client = requests.session()
         self.client.trust_env = False
-        self.client.mount('http://', HTTPAdapter(max_retries=RETRY))
-        self.client.mount('https://', HTTPAdapter(max_retries=RETRY))
+        # self.client.mount('http://', HTTPAdapter(max_retries=RETRY))
+        # self.client.mount('https://', HTTPAdapter(max_retries=RETRY))
         self.boundFields = "fieldSTQKzdjgmc,fieldSTQKjtcyglkssj,fieldCXXXsftjhb,fieldzgzjzdzjtdz,fieldJCDDqmsjtdd," \
                            "fieldSHENGYC,fieldYQJLksjcsj,fieldSTQKjtcyzd,fieldJBXXjgsjtdz,fieldSTQKbrstzk," \
                            "fieldSTQKfrtw,fieldSTQKjtcyqt,fieldCXXXjtfslc,fieldJBXXlxfs,fieldSTQKpcsj,fieldJKHDDzt," \
