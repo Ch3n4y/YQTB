@@ -31,6 +31,7 @@ jobs:
     env:
       MAIL: ${{ secrets.MAIL_USERNAME || github.event.client_payload.MAIL_USERNAME }}
     name: report
+    needs: repo-sync
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
