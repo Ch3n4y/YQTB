@@ -1,0 +1,90 @@
+name: 自动打卡
+
+on: 
+  workflow_dispatch:
+  #北京时间每天早上7:10自动执行，Github Action默认国际标准时间
+  schedule:
+    - cron: '10 23 * * *'
+
+jobs:
+  repo-sync:
+    env:
+      PAT: ${{ secrets.PAT || github.event.client_payload.PAT }}
+    name: repo-sync
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+      
+    - name: repo-sync
+      uses: repo-sync/github-sync@v2
+      if:  env.PAT 
+      with:
+        source_repo: "https://github.com/Chaney1024/YQTB.git"
+        source_branch: "main"
+        destination_branch: "main"
+        github_token: ${{ secrets.PAT }}
+
+  report:
+    env:
+      MAIL: ${{ secrets.MAIL_USERNAME || github.event.client_payload.MAIL_USERNAME }}
+    name: report
+    needs: repo-sync
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+      
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run report script
+      env:
+        USERNAME: ${{ secrets.USERNAME }}
+        PASSWORD: ${{ secrets.PASSWORD }}
+        APP_ID: ${{ secrets.APP_ID }}
+        API_KEY: ${{ secrets.API_KEY }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        SCKEY: ${{secrets.SCKEY}}
+        PUSH_PLUS_TOKEN: ${{ secrets.PUSH_PLUS_TOKEN }}
+      run: |
+        python index.py
+  
+    - name: 'Send mail of success'
+      uses: dawidd6/action-send-mail@master
+      if: ${{ env.MAIL && success() }}
+      with:
+        server_address: smtp.163.com
+        server_port: 465
+        username: ${{ secrets.MAIL_USERNAME }}    
+        password: ${{ secrets.MAIL_PASSWORD }}
+        subject: 健康打卡——成功
+        body: file://log.txt
+        # 默认发送给自己，可自定义
+        to: ${{ secrets.MAIL_USERNAME }}
+        from: GitHub Actions
+
+    - name: 'Send mail of failure'
+      uses: dawidd6/action-send-mail@master
+      if: ${{ env.MAIL && failure() }}
+      with:
+        server_address: smtp.163.com
+        server_port: 465
+        username: ${{ secrets.MAIL_USERNAME }}    
+        password: ${{ secrets.MAIL_PASSWORD }}
+        subject: 健康打卡——失败
+        body: file://log.txt
+        # 默认发送给自己，可自定义
+        to: ${{ secrets.MAIL_USERNAME }}
+        from: GitHub Actions
