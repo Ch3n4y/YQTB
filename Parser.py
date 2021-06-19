@@ -139,7 +139,7 @@ class Parser1:
             'fieldCNS': True,
             # 针对目前新设置的核酸检测，个人感觉会是临时的，到时候疫情过去这块直接删掉即可。
             'fieldJCSJ': '1623081600',  # 6月8日 核酸检测
-            'fieldYZNSFJCHS': '1',  # 一周内是否做过核酸检测 1：是 2：否；若选择否，上面的日期也可不填写
+            'fieldYZNSFJCHS': '2',  # 一周内是否做过核酸检测 1：是 2：否；若选择否，上面的日期也可不填写
             'fieldJKMsfwlm': '1',  # 健康码是否为绿码 1：是 2：否； 若选择否还需要上传健康码截图
         }
         post_data_info = dict(post_data1, **post_data2)
