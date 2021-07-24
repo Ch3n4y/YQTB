@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 
+from des import *
 import base64
 import json
 import random
@@ -63,40 +64,26 @@ class YQTB:
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,und;q=0.7',
         }
 
-    # 识别验证码
-    def ocr(self, image):
-        url = "https://api2.chaney.top/release/gzhu"
-        payload = {
-            'key': 'b42fb9486f3c10e8654072f0648e694f',
-            'image': image,
-        }
-        response = requests.post(url, data=payload)
-        return response.json()
-
-    # 获取验证码
-    def captcha(self):
-        logger.info('验证码识别')
-        image = self.client.get(url='https://cas.gzhu.edu.cn/cas_server/captcha.jsp')
-        base_data = base64.encodebytes(image.content)
-        res = self.ocr(base_data)
-        return res['result']
-
     # 登陆账号
     def login(self):
         logger.info('开始登陆')
         res = self.client.get(url="http://yqtb.gzhu.edu.cn/")
         soup = BeautifulSoup(res.text, "html.parser")
-        form = soup.find_all('input')
+        lt = soup.find("input", attrs={"name": "lt"})['value']
+        execution = soup.find("input", attrs={"name": "execution"})['value']
         post_url = soup.find('form')['action']
-        post_data = {}
-        for row in form:
-            post_data[row['name']] = row['value']
-        del post_data['reset']
-        login_post_url = parse.urljoin(res.url, post_url)
 
-        post_data['username'] = self.username
-        post_data['password'] = self.password
-        post_data['captcha'] = self.captcha()
+        login_post_url = parse.urljoin(res.url, post_url)
+        post_data = {
+            'rsa': strenc("{}{}{}".format(self.username, self.password, lt), '1', '2', '3'),
+            'ul': len(self.username),
+            'pl': len(self.password),
+            'lt': lt,
+            'execution': execution,
+            '_eventId': 'submit'
+        }
+        print(post_data)
+
         res = self.client.post(url=login_post_url, data=post_data)
         soup = BeautifulSoup(res.content.decode('utf-8'), 'html.parser')
 
