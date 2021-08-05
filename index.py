@@ -67,7 +67,7 @@ class YQTB:
     # 登陆账号
     def login(self):
         logger.info('开始登陆')
-        res = self.client.get(url="http://yqtb.gzhu.edu.cn/")
+        res = self.client.get(url="http://yq.gzhu.edu.cn/")
         soup = BeautifulSoup(res.text, "html.parser")
         lt = soup.find("input", attrs={"name": "lt"})['value']
         execution = soup.find("input", attrs={"name": "execution"})['value']
@@ -82,8 +82,6 @@ class YQTB:
             'execution': execution,
             '_eventId': 'submit'
         }
-        print(post_data)
-
         res = self.client.post(url=login_post_url, data=post_data)
         soup = BeautifulSoup(res.content.decode('utf-8'), 'html.parser')
 
