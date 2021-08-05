@@ -86,13 +86,8 @@ class YQTB:
         soup = BeautifulSoup(res.content.decode('utf-8'), 'html.parser')
 
         if soup.title.string != '广州大学':
-            # 账号或密码错误
-            msg = soup.select('#msg')[0].text
-            if msg == '账号或密码错误':
-                logger.warning('账号或密码错误')
-                return False
-            logger.warning('验证码错误，尝试重新登陆')
-            self.login()
+            logger.warning('账号或密码错误')
+            return False
         logger.info('登陆成功')
         return True
 
