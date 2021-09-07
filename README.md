@@ -36,7 +36,7 @@ crontab -e
 
 **2.1 新建**  
 选择自定义创建，运行环境选择```python3.6```  
-函数代码选择本地上传zip包，代码包[下载地址](https://4n3y-1259527519.cos.ap-guangzhou.myqcloud.com/yqtb.zip)  
+函数代码选择本地上传zip包，代码包[下载地址](https://github.com/Chaney1024/YQTB/releases/download/scf/yqtb.zip)  
 
 ![20210412122136](https://img.chaney.top/images/20210412122136.png)
 

@@ -2,3 +2,5 @@ venv/
 test/
 .idea/
 __pycache__/
+data.py
+test.py
