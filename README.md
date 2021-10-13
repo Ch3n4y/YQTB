@@ -3,18 +3,21 @@
 ```shell
 git clone https://github.com/Chaney1024/YQTB.git
 ```
-2、安装依赖
+2、切换分支
 ```shell
-cd YQTB && pip3 install -r requirements.txt
+cd YQTB && git checkout main
 ```
-3、修改```config.py```文件中的学号密码  
-  
+3、安装依赖
+```shell
+pip3 install -r requirements.txt
+```
+4、修改```config.py```文件中的学号密码  
 
-4、测试执行  
+5、测试执行  
 ```shell
 python3 index.py
 ```
-5、使用linux自带定时任务```crontab```  
+6、使用linux自带定时任务```crontab```  
 ```shell
 crontab -e
 ```
