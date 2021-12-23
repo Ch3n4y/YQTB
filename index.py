@@ -94,7 +94,7 @@ class YQTB:
     # 准备数据
     def prepare(self):
         logger.info("准备数据")
-        res = self.client.get(url="http://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true")
+        res = self.client.get(url="https://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true")
         soup = BeautifulSoup(res.content.decode('utf-8'), 'html.parser')
         self.csrfToken = soup.find(attrs={"itemscope": "csrfToken"})['content']
         self.formStepId = re.findall(r"\d+", res.url)[0]
@@ -102,7 +102,7 @@ class YQTB:
         # 温馨提示
         if self.formStepId == '1':
             self.workflowId = re.findall(r"workflowId = \"(.*?)\"", res.content.decode('utf-8'))[0]
-            url = "http://yqtb.gzhu.edu.cn/infoplus/interface/preview"
+            url = "https://yqtb.gzhu.edu.cn/infoplus/interface/preview"
             payload = {
                 'workflowId': self.workflowId,
                 'rand': random.uniform(300, 400),
@@ -118,8 +118,8 @@ class YQTB:
                 'X-Requested-With': 'XMLHttpRequest',
                 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                'Origin': 'http://yqtb.gzhu.edu.cn',
-                'Referer': 'http://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true',
+                'Origin': 'https://yqtb.gzhu.edu.cn',
+                'Referer': 'https://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true',
                 'Accept-Encoding': 'gzip, deflate',
                 'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,und;q=0.7',
                 'Connection': 'close'
@@ -128,7 +128,7 @@ class YQTB:
             res = self.client.post(url, headers=headers, data=payload)
             formData = Parser2(res.json()).get()
 
-            url = "http://yqtb.gzhu.edu.cn/infoplus/interface/start"
+            url = "https://yqtb.gzhu.edu.cn/infoplus/interface/start"
             payload = {
                 'idc': 'XNYQSB',
                 'release': '',
@@ -144,8 +144,8 @@ class YQTB:
                 'X-Requested-With': 'XMLHttpRequest',
                 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                'Origin': 'http://yqtb.gzhu.edu.cn',
-                'Referer': 'http://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true',
+                'Origin': 'https://yqtb.gzhu.edu.cn',
+                'Referer': 'https://yqtb.gzhu.edu.cn/infoplus/form/XNYQSB/start?back=1&x_posted=true',
                 'Accept-Encoding': 'gzip, deflate',
                 'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,und;q=0.7',
                 'Connection': 'close'
@@ -155,7 +155,7 @@ class YQTB:
                 raise RuntimeError('system error')
             else:
                 self.formStepId = re.findall(r"\d+", res['entities'][0])[0]
-                self.formUrl = "http://yqtb.gzhu.edu.cn/infoplus/form/{}/render?back=2".format(self.formStepId)
+                self.formUrl = "https://yqtb.gzhu.edu.cn/infoplus/form/{}/render?back=2".format(self.formStepId)
         post_data = {
             'stepId': self.formStepId,
             'instanceId': '',
@@ -171,13 +171,13 @@ class YQTB:
             'X-Requested-With': 'XMLHttpRequest',
             'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Origin': 'http://yqtb.gzhu.edu.cn',
+            'Origin': 'https://yqtb.gzhu.edu.cn',
             'Referer': self.formUrl,
             'Accept-Encoding': 'gzip, deflate',
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,und;q=0.7',
             'Connection': 'close'
         }
-        res = self.client.post(url="http://yqtb.gzhu.edu.cn/infoplus/interface/render", headers=headers, data=post_data)
+        res = self.client.post(url="https://yqtb.gzhu.edu.cn/infoplus/interface/render", headers=headers, data=post_data)
         self.getDatas = res.json()
 
     # 开始执行打卡
@@ -193,7 +193,7 @@ class YQTB:
             'X-Requested-With': 'XMLHttpRequest',
             'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Origin': 'http://yqtb.gzhu.edu.cn',
+            'Origin': 'https://yqtb.gzhu.edu.cn',
             'Referer': self.formUrl,
             'Accept-Encoding': 'gzip, deflate',
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,und;q=0.7',
@@ -221,9 +221,9 @@ class YQTB:
             'nextUsers': '{}',
             'remark': ''
         }
-        res1 = self.client.post(url='http://yqtb.gzhu.edu.cn/infoplus/interface/listNextStepsUsers', headers=headers,
+        res1 = self.client.post(url='https://yqtb.gzhu.edu.cn/infoplus/interface/listNextStepsUsers', headers=headers,
                                 data=post_data1)
-        res2 = self.client.post(url='http://yqtb.gzhu.edu.cn/infoplus/interface/doAction', headers=headers,
+        res2 = self.client.post(url='https://yqtb.gzhu.edu.cn/infoplus/interface/doAction', headers=headers,
                                 data=post_data2)
         if res1.json()['errno'] or res2.json()['errno']:
             raise RuntimeError('打卡失败')
